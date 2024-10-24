@@ -1,0 +1,106 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Фильтрация данных</title>
+    <link href="https://fonts.googleapis.com/css2?family=Russo+One&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'model/styles.css' %}">
+    <script src="{% static 'model/particles.min.js' %}"></script>
+</head>
+<body>
+    <div id="particles-js"></div>
+
+    <div class="container mt-5">
+        <div id="logo" class="mb-4">
+            <img src="{% static 'model/mts-logo.jpg' %}" alt="Логотип" class="img-fluid">
+        </div>
+        <h1 class="text-center">Фильтрация данных</h1>
+
+        <!-- Сообщения об успехе или ошибке -->
+        {% if messages %}
+            <div class="mt-3">
+                {% for message in messages %}
+                    <div class="alert {% if message.tags %}alert-{{ message.tags }}{% endif %}" role="alert">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        <form method="post" action="">
+            {% csrf_token %}
+            {{ filter_formset.management_form }}
+            <div class="row mt-4">
+                <div class="col-md-3">
+                    <h5>Выберите год(ы)</h5>
+                    {{ form.years }}
+                    <div class="mt-2">
+                        <button type="submit" class="btn btn-primary btn-confirm-year" id="confirm-year-selection">Подтвердить выбор года</button>
+                        <button type="button" id="reset-year-button" class="btn btn-secondary btn-reset-year">Сбросить выбор года</button>
+                    </div>
+                </div>
+
+                <div class="col-md-9">
+                    <h5>Добавьте условия фильтрации:</h5>
+                    <div id="filters-container">
+                        {% for form in filter_formset %}
+                            <div class="filter-block">
+                                <button type="button" class="btn btn-danger btn-sm btn-delete">Удалить</button>
+                                <div class="form-group mt-2">
+                                    {{ form.field.label_tag }} {{ form.field }}
+                                </div>
+                                <div class="form-group mt-2">
+                                    {{ form.filter_type.label_tag }} {{ form.filter_type }}
+                                </div>
+                                <div class="form-group mt-2">
+                                    {{ form.value.label_tag }} {{ form.value }}
+                                </div>
+                                {% if filter_formset.can_delete %}
+                                    <div class="form-group mt-2">
+                                        {{ form.DELETE }} <label for="{{ form.DELETE.id_for_label }}">Удалить</label>
+                                    </div>
+                                {% endif %}
+                            </div>
+                        {% endfor %}
+                    </div>
+                    <button type="button" id="add-filter" class="btn btn-success mt-2">Добавить фильтр</button>
+
+                    <div class="mt-4">
+                        <button type="submit" class="btn btn-primary">Отправить данные</button>
+                        <button type="button" id="reset-button" class="btn btn-secondary">Сбросить фильтры</button>
+                    </div>
+
+                    <h5 class="mt-4">Выбранные параметры:</h5>
+                    <div id="selected-output" class="border p-3">
+                        {% if selected_data.years %}
+                            <p><strong>Годы:</strong> {{ selected_data.years|join:", " }}</p>
+                        {% endif %}
+                        {% if selected_data.filters %}
+                            {% for filter in selected_data.filters %}
+                                <p>
+                                    <strong>{{ filter.field|capfirst }}:</strong>
+                                    {% if filter.filter_type == 'include' %}
+                                        Включить
+                                    {% else %}
+                                        Исключить
+                                    {% endif %}
+                                    {{ filter.value }}
+                                </p>
+                            {% endfor %}
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <div id="loading-spinner" style="display: none;">
+        <div class="spinner"></div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="{% static 'model/scripts.js' %}"></script>
+</body>
+</html>
